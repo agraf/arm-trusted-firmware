@@ -77,6 +77,19 @@ func bl31_entrypoint
 	 */
 	bl	reset_handler
 #endif
+
+#if 1 // def BL31_COPIES_BL33
+#define NS_IMAGE_OFFSET 0x4a000000
+	mov	x0, #NS_IMAGE_OFFSET
+	mov	x3, #(NS_IMAGE_OFFSET + 2 * 1024 * 1024)	/* copy 2MB */
+	adr	x1, __DATA_END__
+1:
+	ldr	x2, [x1], #8
+	str	x2, [x0], #8
+	cmp	x0, x3
+	b.ne	1b
+#endif
+
 	/* ---------------------------------------------
 	 * Enable the instruction cache, stack pointer
 	 * and data access alignment checks
