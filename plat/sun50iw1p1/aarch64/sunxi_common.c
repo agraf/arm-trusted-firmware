@@ -205,7 +205,10 @@ uint32_t sunxi_get_spsr_for_bl33_entry(void)
 	 * well.
 	 */
 	spsr = SPSR_64(mode, MODE_SP_ELX, DISABLE_ALL_EXCEPTIONS);
+#if 0
 	spsr = SPSR_MODE32(MODE32_svc, SPSR_T_ARM, SPSR_E_LITTLE,
 			   DISABLE_ALL_EXCEPTIONS);
+#endif
+
 	return spsr;
 }
