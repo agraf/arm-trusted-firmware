@@ -38,6 +38,7 @@
 #include <platform.h>
 #include <runtime_svc.h>
 #include <string.h>
+#include <arisc.h>
 
 /*******************************************************************************
  * This function pointer is used to initialise the BL32 image. It's initialized
@@ -110,6 +111,11 @@ void bl31_main(void)
 		INFO("BL3-1: Initializing BL3-2\n");
 		//(*bl32_init)();
 	}
+
+	INFO("BL3-1: arisc probe\n");
+	/* First start the arisc */
+	sunxi_arisc_probe(NULL);
+
 	//__asm__ __volatile__ ("b .");
 	/*
 	 * We are ready to enter the next EL. Prepare entry into the image

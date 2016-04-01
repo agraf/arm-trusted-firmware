@@ -24,7 +24,139 @@
 /* local functions */
 static int arisc_wait_ready(unsigned int timeout);
 
-struct dts_cfg dts_cfg;
+struct dts_cfg dts_cfg = {
+	.dram_para = {
+		.dram_clk = 0,
+		.dram_type = 0,
+		.dram_zq = 0,
+		.dram_odt_en = 0,
+		.dram_para1 = 0,
+		.dram_para2 = 0,
+		.dram_mr0 = 0,
+		.dram_mr1 = 0,
+		.dram_mr2 = 0,
+		.dram_mr3 = 0,
+		.dram_tpr0 = 0,
+		.dram_tpr1 = 0,
+		.dram_tpr2 = 0,
+		.dram_tpr3 = 0,
+		.dram_tpr4 = 0,
+		.dram_tpr5 = 0,
+		.dram_tpr6 = 0,
+		.dram_tpr7 = 0,
+		.dram_tpr8 = 0,
+		.dram_tpr9 = 0,
+		.dram_tpr10 = 0,
+		.dram_tpr11 = 0,
+		.dram_tpr12 = 0,
+		.dram_tpr13 = 0,
+	},
+	.vf = {
+		{
+			.freq = 0x44aa2000,
+			.voltage = 0x514,
+		}, {
+			.freq = 0x41cdb400,
+			.voltage = 0x4ec,
+		}, {
+			.freq = 0x3ef14800,
+			.voltage = 0x4d8,
+		}, {
+			.freq = 0x3c14dc00,
+			.voltage = 0x4b0,
+		}, {
+			.freq = 0x39387000,
+			.voltage = 0x488,
+		}, {
+			.freq = 0x365c0400,
+			.voltage = 0x460,
+		}, {
+			.freq = 0x30a32c00,
+			.voltage = 0x438,
+		}, {
+			.freq = 0x269fb200,
+			.voltage = 0x410,
+		}
+	},
+	.space = {
+		.sram_dst = 0x40000,
+		.sram_offset = 0x0,
+		.sram_size = 0x14000,
+		.dram_dst = 0x40100000,
+		.dram_offset = 0x18000,
+		.dram_size = 0x4000,
+		.para_dst = 0x40104000,
+		.para_offset = 0x0,
+		.para_size = 0x1000,
+		.msgpool_dst = 0x40105000,
+		.msgpool_offset = 0x0,
+		.msgpool_size = 0x1000,
+		.standby_dst = 0x41020000,
+		.standby_offset = 0x0,
+		.standby_size = 0x800,
+	},
+	.image = {
+		.base = 0x40000,
+		.size = 0x19a00,
+	},
+	.prcm = {
+		.base = 0x1f01400,
+		.size = 0x400,
+	},
+	.cpuscfg = {
+		.base = 0x1f01c00,
+		.size = 0x400,
+	},
+	.msgbox = {
+		.base = 0x1c17000,
+		.size = 0x1000,
+		.irq = 0,
+		.status = 0x1,
+	},
+	.hwspinlock = {
+		.base = 0x1c18000,
+		.size = 0x1000,
+		.irq = 0,
+		.status = 0x1,
+	},
+	.s_uart = {
+		.base = 0x1f02800,
+		.size = 0x400,
+		.irq = 0,
+		.status = 0x1,
+	},
+	.s_rsb = {
+		.base = 0x1f03400,
+		.size = 0x400,
+		.irq = 0,
+		.status = 0x1,
+	},
+	.s_jtag = {
+		.base = 0,
+		.size = 0,
+		.irq = 0,
+		.status = 0,
+	},
+	.s_cir = {
+		.base = 0,
+		.size = 0,
+		.irq = 0,
+		.power_key_code = 0x4d,
+		.addr_code = 0x4040,
+		.status = 0,
+	},
+	.pmu = {
+		.pmu_bat_shutdown_ltf = 0xc80,
+		.pmu_bat_shutdown_htf = 0xed,
+		.pmu_pwroff_vol = 0xce4,
+		.power_start = 0x0,
+	},
+	.power = {
+		.powchk_used = 0,
+		.power_reg = 0x2309621,
+		.system_power = 0x32,
+	},
+};
 unsigned int arisc_debug_dram_crc_en = 0;
 unsigned int arisc_debug_dram_crc_srcaddr = 0x40000000;
 unsigned int arisc_debug_dram_crc_len = (1024 * 1024);
@@ -137,36 +269,12 @@ static int sunxi_arisc_para_init(struct arisc_para *para)
 	return 0;
 }
 
-uint32_t sunxi_load_arisc(uintptr_t image_addr, size_t image_size, void *para, size_t para_size)
+uint32_t sunxi_copy_arisc_para(void *para, size_t para_size)
 {
 	void *dst;
 	void *src;
 	size_t size;
 
-#if 0
-	/*
-	 * phys addr to virt addr
-	 * io space: ioremap
- 	 * kernel space: phys_to_virt
- 	 */
-	/* sram code space */
-	dst = (void *)dts_cfg.space.sram_dst;
-	src = (void *)((ptrdiff_t)image_addr + (ptrdiff_t)dts_cfg.space.sram_offset);
-	size = dts_cfg.space.sram_size;
-	memset(dst, 0, size);
-	memcpy(dst, src, size);
-	flush_dcache_range((uint64_t)dst, (uint64_t)size);
-
-	/* dram code space */
-	dst = (void *)dts_cfg.space.dram_dst;
-	src = (void *)((ptrdiff_t)image_addr + (ptrdiff_t)dts_cfg.space.dram_offset);
-	size = dts_cfg.space.dram_size;
-	memset(dst, 0, size);
-	memcpy(dst, src, size);
-	flush_dcache_range((uint64_t)dst, (uint64_t)size);
-
-	ARISC_INF("load arisc image finish\n");
-#endif
 	/* para space */
 	dst = (void *)dts_cfg.space.para_dst;
 	src = para;
@@ -178,14 +286,6 @@ uint32_t sunxi_load_arisc(uintptr_t image_addr, size_t image_size, void *para, s
 	flush_dcache_range((uint64_t)dst, (uint64_t)size);
 	isb();
 
-#if 0
-	/* relese arisc reset */
-	sunxi_deassert_arisc();
-	ARISC_INF("release arisc reset finish\n");
-
-	ARISC_INF("load arisc finish\n");
-#endif
-
 	return 0;
 }
 
@@ -194,14 +294,13 @@ int sunxi_arisc_probe(void *cfg)
 	struct arisc_para para;
 
 	ARISC_LOG("sunxi-arisc driver begin startup %d\n", arisc_debug_level);
-	memcpy((void *)&dts_cfg, (const void *)cfg, sizeof(struct dts_cfg));
+	//memcpy((void *)&dts_cfg, (const void *)cfg, sizeof(struct dts_cfg));
 
 	/* init arisc parameter */
 	sunxi_arisc_para_init(&para);
 
-	/* load arisc */
-	sunxi_load_arisc(dts_cfg.image.base, dts_cfg.image.size,
-	                 (void *)(&para), sizeof(struct arisc_para));
+	/* copy arisc para */
+	sunxi_copy_arisc_para((void *)(&para), sizeof(struct arisc_para));
 
 	/* initialize hwspinlock */
 	ARISC_INF("hwspinlock initialize\n");

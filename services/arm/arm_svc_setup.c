@@ -85,8 +85,6 @@ void prepare_nonsec_os_entry(uint64_t kernel_addr, uint64_t dtb_addr)
 				       DISABLE_ALL_EXCEPTIONS);
 	next_image_info.pc = kernel_addr;
 	next_image_info.args.arg0 = dtb_addr;
-	
-	
 
 	INFO("BL3-1: Next image address = 0x%llx\n",(unsigned long long) next_image_info.pc);
 	INFO("BL3-1: Next image spsr = 0x%x\n", next_image_info.spsr);
@@ -132,7 +130,7 @@ uint64_t arm_svc_smc_handler(uint32_t smc_fid,
 	//arise cmd begin
 	//arise aa32 cmd
 	case ARM_SVC_ARISC_STARTUP:
-		SMC_RET1(handle, sunxi_arisc_probe((void *)x1));
+		SMC_RET1(handle, 0);
 	case ARM_SVC_ARISC_WAIT_READY:
 		SMC_RET1(handle, sunxi_arisc_wait_ready());
 	case ARM_SVC_ARISC_READ_PMU:
