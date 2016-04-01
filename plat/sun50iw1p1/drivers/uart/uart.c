@@ -76,7 +76,7 @@ void sunxi_serial_init(int uart_port, void *gpio_cfg, int gpio_max)
 	//gpio
 	//boot_set_gpio(gpio_cfg, gpio_max, 1);  //boot set,so not need to set again
 	//uart init
-	serial_ctrl_base = (serial_hw_t *)(SUNXI_UART0_BASE + uart_port * CCM_UART_ADDR_OFFSET);
+	serial_ctrl_base = (serial_hw_t *)(long)(SUNXI_UART0_BASE + uart_port * CCM_UART_ADDR_OFFSET);
 	serial_ctrl_base->mcr = 0x3;
 	uart_clk = (24000000 + 8 * UART_BAUD)/(16 * UART_BAUD);
 	serial_ctrl_base->lcr |= 0x80;
